@@ -96,11 +96,12 @@ output "backend_subnet_ids" {
 #Private Endpoints
 output "sql_private_endpoint_ip" {
   description = "Private IP address of the SQL Private Endpoint"
-  value       = azurerm_private_endpoint.sql.private_service_connection[0].private_ip_address
+  value       = azurerm_private_endpoint.sql.ip_configuration[0].private_ip_address
 }
+
 output "keyvault_private_endpoint_ip" {
   description = "Private IP address of the Key Vault Private Endpoint"
-  value       = azurerm_private_endpoint.keyvault.private_service_connection[0].private_ip_address
+  value       = azurerm_private_endpoint.keyvault.ip_configuration[0].private_ip_address
 }
 
 #Application Gateway
