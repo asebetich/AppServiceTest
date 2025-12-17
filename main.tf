@@ -13,28 +13,6 @@ resource "azurerm_resource_group" "resource-group" {
   tags = var.tags
 }
 
-#############
-# KEY VAULT #
-#############
-module "KeyVault" {
-  source = "./modules/keyVault"
-
-  rg_name        = azurerm_resource_group.resource-group.name
-  key_vault_name = var.key_vault_name
-  key_vault_sku  = "standard"
-  tenant_id      = data.azurerm_client_config.current.tenant_id
-
-  keyvault_access_policy = {
-    linux-app-policy = { # Access policy for the Linux App Service
-      tenant_id          = data.azurerm_client_config.current.tenant_id
-      object_id          = azurerm_linux_web_app.linux-app.identity[0].principal_id
-      secret_permissions = ["Get", "List"]
-    }
-  }
-
-  tags = var.tags
-}
-
 #########################
 # SQL SERVER & DATABASE #
 #########################
@@ -91,7 +69,7 @@ resource "azurerm_linux_web_app" "linux-app" {
   service_plan_id     = azurerm_service_plan.asp.id
 
   identity {
-    type = "SystemAssigned"
+    type = "SystemAssigned" #this creates the "managed identity"
   }
 
   site_config {
@@ -104,5 +82,27 @@ resource "azurerm_linux_web_app" "linux-app" {
     SQL_SERVER   = azurerm_mssql_server.sql-server.fully_qualified_domain_name
     SQL_DATABASE = azurerm_mssql_database.sql-db.name
   }
+  tags = var.tags
+}
+
+#############
+# KEY VAULT #
+#############
+module "KeyVault" {
+  source = "./modules/keyVault"
+
+  rg_name        = azurerm_resource_group.resource-group.name
+  key_vault_name = var.key_vault_name
+  key_vault_sku  = "standard"
+  tenant_id      = data.azurerm_client_config.current.tenant_id
+
+  keyvault_access_policy = {
+    linux-app-policy = { # Access policy for the Linux App Service
+      tenant_id          = data.azurerm_client_config.current.tenant_id
+      object_id          = azurerm_linux_web_app.linux-app.identity[0].principal_id
+      secret_permissions = ["Get", "List"]
+    }
+  }
+
   tags = var.tags
 }
